@@ -1,0 +1,71 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: BTF-PID-DEV-MUM-K8S-01
+  region: ap-south-1
+  version: "1.26"
+
+vpc:
+  id: "vpc-028ba21f2d8758501"
+  cidr: "10.32.0.0/16"
+  subnets:
+    private:
+      ap-south-1a:
+        id: "subnet-03b563201d567dc78"
+        cidr: "10.32.51.0/24"
+      ap-south-1b:
+        id: "subnet-06db99ab6769e4989"
+        cidr: "10.32.52.0/24"
+      ap-south-1c:
+        id: "subnet-0ceacaf5e3c66355d"
+        cidr: "10.32.53.0/24"
+    public:
+      ap-south-1a:
+        id: "subnet-0f6d6a11f0637a24d"
+        cidr: "10.32.1.0/24"
+      ap-south-1b:
+        id: "subnet-0b3e49e2632a794b0"
+        cidr: "10.32.2.0/24"
+      ap-south-1c:
+        id: "subnet-0732db8a749528ad2"
+        cidr: "10.32.3.0/24"
+
+managedNodeGroups:
+  - name: BTF-PID-DEV-MUM-K8S-GRP-01
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 10
+    instanceType: t4g.xlarge
+    volumeSize: 100
+    spot: true
+    privateNetworking: true
+    ssh:
+      allow: true
+      publicKeyName: BTF-PID-DEV-MUM-KEY-01
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        externalDNS: true
+        certManager: true
+        appMesh: true
+        appMeshPreview: true
+        ebs: true
+        fsx: true
+        efs: true
+        awsLoadBalancerController: true
+        xRay: true
+        cloudWatch: true
+        albIngress: true
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: s3-dynamodb-full-access
+      labels: {aws-usage: "application"}
+    attachPolicyARNs:
+    - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+    - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
